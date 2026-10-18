@@ -33,9 +33,14 @@ function enForms(v, obj) {
   return v.en;
 }
 
+// er/sie/es can mean a thing. When the rest of the sentence only fits things
+// («Sie wird kalt sein» about the soup, «Er wird gegessen»), say "it".
+const notHuman = tags => !tags.includes('human') && !tags.includes('any');
 function subjectWord(info) {
   const s = info.subj;
   if (s.pron && s.enPl && info.person === 5) return s.enPl;
+  const thing = (info.adj && notHuman(info.adj.tags)) || (info.passive && notHuman(VERBS[info.main].objTags));
+  if (s.pron && s.tags.includes('any') && thing) return 'it';
   return s.en;
 }
 
@@ -49,8 +54,13 @@ export function toEnglish(info) {
   const k = info.person === 0 ? '1sg' : info.person === 2 ? '3sg' : 'pl';
   const t = info.tense === 'praeteritum' || info.tense === 'perfekt' ? 'past' : 'pres';
   const isBe = info.main === 'sein';
-  const gern = info.advs.some(a => a.word === 'gern') && !v.noGern && !v.copula && info.mode !== 'passive' && info.modal !== 'möchten';
-  const M = enForms(v, info.obj);
+  let gern = info.advs.some(a => a.word === 'gern') && !v.noGern && !v.copula && info.mode !== 'passive' && info.modal !== 'möchten';
+  let M = enForms(v, info.obj);
+  // «etwas gern haben» is the idiom "to like something".
+  if (gern && info.main === 'haben') {
+    M = LIKE;
+    gern = false;
+  }
   const sfx = v.enSfx ? [v.enSfx] : [];
   const lex = f => ({ lex: f, t });
   const op = w => ({ op: w });

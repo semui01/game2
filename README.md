@@ -52,7 +52,9 @@ It checks:
 - **Valency:** verbs that need an object (*kaufen*), can't take one (*gehen*), or take an adjective (*sein, werden*).
 - **Tense and time words:** *gestern* needs a past tense, *morgen* doesn't fit one.
 - **Negation:** position of *nicht*, *kein* instead of *nicht ein*, no double negation.
-- **Pronoun position:** *Er liest es gern*, not *Er liest gern es*.
+- **Pronoun position:** *Er liest es gern*, not *Er liest gern es*; an object pronoun doesn't open the sentence (*Es hat der Hund …*).
+- **Adverbs:** time before frequency before *gern* (*heute oft gern*), time and frequency words before a noun without article (*Ich trinke heute Kaffee*), and no contradictions (*oft immer*, *immer morgen*).
+- **Question words:** *wer* for people, *was* for things; *wo* is not used with *gehen*/*kommen* (that's *wohin*/*woher*).
 - **Meaning:** grammatical sentences that make no sense are flagged kindly ("Grammar ✓, but a dog can't read!"), including the classic trap *Ich bin kalt* → *Mir ist kalt*.
 
 Case and agreement slips are "soft": the parser carries on as if the form were right, so a sentence with one wrong ending is told exactly which ending to fix (*«ich esse», not «ich isst»*) rather than getting a far-fetched alternative reading. For word-order mistakes, `suggest()` searches all orderings of the same tiles and offers the closest valid one.
@@ -84,7 +86,7 @@ No dependencies and no build step needed for development.
 npm test
 ```
 
-- `tests/grammar.test.mjs`: about 50 correct sentences with their expected English, 26 typical mistakes with the expected diagnosis, explanation wording, word-order suggestions and search pruning.
+- `tests/grammar.test.mjs`: 61 correct sentences with their expected English, 36 typical mistakes with the expected diagnosis, explanation wording, word-order suggestions and search pruning.
 - `tests/levels.test.mjs`: every spawn word exists, every example sentence is valid and shows its lesson's topic, a bot can win every level, specials and refills work, wrong attempts cost no move, and a game survives a save/restore round trip.
 
 ## Adding words

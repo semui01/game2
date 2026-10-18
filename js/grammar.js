@@ -26,6 +26,7 @@ const START = {
   adj: null,
   vf: null,
   advs: [],
+  mfAdvs: [],
   nicht: -1,
   nichtScoped: false,
   mf: 0,
@@ -33,6 +34,15 @@ const START = {
   question: null,
   soft: [],
 };
+
+// Mittelfeld adverb order: time before frequency before manner («heute oft gern»).
+const ADV_RANK = { time: 0, freq: 1, manner: 2 };
+
+// «immer morgen» and «oft morgen» contradict each other; «jetzt immer» is fine.
+const advClash = (x, y) => (x.word === 'immer' && y.type === 'time' && y.word !== 'jetzt') || (x.word === 'oft' && !!y.future);
+
+// Objects without a definite article sit late in the Mittelfeld: «Ich trinke heute Kaffee».
+const bareObject = o => o.np && o.g !== 'prop' && (o.det === 'zero' || o.det === 'indef' || o.det === 'kein');
 
 function E(depth, code, ctx = {}) {
   return { err: { depth, code, ctx } };
@@ -73,21 +83,26 @@ function place(t, a, i) {
       if (!a.caseOk) soft(t, 'case-obj', { a, at: i });
       if (t.nicht >= 0 && !t.nichtScoped && !a.zeroOnly) return E(5, 'nicht-before-obj', { a, at: t.nicht });
       // Object pronouns come early in the Mittelfeld: «Er liest es gern», not «Er liest gern es».
-      if (a.pron && (t.mfAdv || t.nicht >= 0)) return E(5, 'pron-late', { a, at: i });
+      if (a.pron && (t.mfAdvs.length || t.nicht >= 0)) return E(5, 'pron-late', { a, at: i });
       t.obj = a;
       t.objPos = i;
       return t;
-    case 'adv':
+    case 'adv': {
       if (t.advs.some(b => b.word === a.word)) return E(3, 'dup', { a, at: i });
-      if (a.type === 'time' && t.advs.some(b => b.type === 'time')) return E(5, 'two-time', { a, at: i });
+      if (t.fin) {
+        const later = t.mfAdvs.find(b => ADV_RANK[b.type] > ADV_RANK[a.type]);
+        if (later) return E(5, 'adv-order', { a, other: later, at: i });
+        if (a.type !== 'manner' && t.obj && t.objPos > t.finPos && bareObject(t.obj)) return E(5, 'adv-after-obj', { a, obj: t.obj, at: i });
+      }
       if (t.nicht >= 0) {
         // "nicht gern", "nicht oft", "nicht immer" are fine; "nicht heute" is not.
         if (t.nicht === i - 1 && (a.type === 'freq' || a.type === 'manner')) t.nichtScoped = true;
         else return E(5, 'nicht-before-adv', { a, at: t.nicht });
       }
       t.advs = [...t.advs, a];
-      if (t.fin) t.mfAdv = true;
+      if (t.fin) t.mfAdvs = [...t.mfAdvs, a];
       return t;
+    }
     case 'nicht':
       if (t.nicht >= 0) return E(3, 'dup', { a, at: i });
       t.nicht = i;
@@ -114,6 +129,8 @@ function step(s, a, i) {
     if (a.r === 'rb') return E(1, 'rb-first', { a, at: i });
     if (a.r === 'nicht') return E(1, 'nicht-first', { a, at: i });
     if (a.r === 'adj') return E(1, 'adj-first', { a, at: i });
+    // Unstressed object pronouns don't open a sentence: not «Es hat der Hund gesehen».
+    if (a.r === 'obj' && a.pron && a.caseOk) return E(4, 'pron-vf', { a, at: i });
     t.vf = a;
     t.slot = 'FIN';
     if (a.wh) t.question = 'w';
@@ -209,9 +226,11 @@ function finish(s, n) {
     if (s.adj) return E(5, 'adj-no-cop', { ...ctx, at: s.adjPos });
     if (v.obj === 'none' && s.obj) return E(5, 'obj-none', { ...ctx, at: s.objPos });
     if (v.obj === 'req' && !s.obj) return E(5, 'obj-req', { ...ctx, at: s.finPos });
-    if (!tagsMatch(s.subj.tags, v.subj || ANIMATE)) return E(7, 'sem-subj', { ...ctx, at: s.subjPos });
+    if (!tagsMatch(s.subj.tags, v.subj || ANIMATE)) return E(7, s.subj.wh && s.subj.text === 'was' ? 'was-wer' : 'sem-subj', { ...ctx, at: s.subjPos });
     if (s.obj && !tagsMatch(s.obj.tags, v.objTags)) return E(7, 'sem-obj', { ...ctx, at: s.objPos });
   }
+
+  if (s.vf?.word === 'wo' && v.noWo) return E(6, 'wo-motion', { ...ctx, at: 0 });
 
   const past = PAST.has(tense);
   for (const adv of s.advs) {
@@ -257,6 +276,25 @@ function finish(s, n) {
   };
 }
 
+// Adverb combinations that no word order can rescue («oft immer», «immer morgen»)
+// are reported before parsing, so they win over any order complaint.
+function adverbConflict(toks) {
+  const seen = [];
+  for (let i = 0; i < toks.length; i++) {
+    const a = toks[i].length === 1 && toks[i][0].r === 'adv' && toks[i][0].type !== 'wh' ? toks[i][0] : null;
+    if (!a || seen.some(b => b.word === a.word)) continue;
+    const at = { a, at: i };
+    if (a.type === 'time' && seen.some(b => b.type === 'time')) return { depth: 9, code: 'two-time', ctx: at };
+    const freq = seen.find(b => b.type === 'freq');
+    if (a.type === 'freq' && freq) return { depth: 9, code: 'two-freq', ctx: { ...at, other: freq } };
+    const clash = seen.find(b => advClash(a, b) || advClash(b, a));
+    if (clash) return { depth: 9, code: 'adv-clash', ctx: { ...at, other: clash } };
+    if (seen.length >= 2) return { depth: 9, code: 'too-many-adv', ctx: at };
+    seen.push(a);
+  }
+  return null;
+}
+
 // Returns { ok, viable, parse | error }.
 // viable: some reading survives every word so far, so adding words could still work.
 // strict: drop readings with soft slips at once (the board search only needs valid ones).
@@ -264,6 +302,8 @@ export function analyze(words, { strict = false } = {}) {
   const n = words.length;
   const toks = words.map(w => LEX.get(w));
   if (!n || toks.some(t => !t)) return { ok: false, viable: false, error: { depth: 0, code: n ? 'unknown' : 'short', ctx: {} } };
+  const conflict = adverbConflict(toks);
+  if (conflict) return { ok: false, viable: false, error: conflict };
   let best = null;
   let bestErr = null;
   let viable = false;
@@ -392,6 +432,38 @@ export function explain(error) {
       title = 'Doppelt';
       text = `${Q(c.a.text)} twice? Once is enough.`;
       break;
+    case 'adv-clash':
+      title = 'Passt nicht zusammen';
+      text = `${Q(c.other.word)} (${c.other.en}) and ${Q(c.a.word)} (${c.a.en}) don’t fit together. Keep one of them.`;
+      break;
+    case 'too-many-adv':
+      title = 'Zu viele Adverbien';
+      text = 'Two adverbs per sentence are plenty: «Ich esse heute gern Pizza».';
+      break;
+    case 'adv-order':
+      title = 'Reihenfolge';
+      text = `${Q(c.a.word)} comes before ${Q(c.other.word)}. Order: time, then how often, then «gern»: «heute oft», «oft gern».`;
+      break;
+    case 'adv-after-obj':
+      title = 'Reihenfolge';
+      text = `Time and frequency words come before an object without der/die/das: «… ${c.a.word} ${c.obj.text}», not «… ${c.obj.text} ${c.a.word}».`;
+      break;
+    case 'pron-vf':
+      title = 'Pronomen nicht vorne';
+      text = `An object pronoun like ${Q(c.a.text)} doesn’t start a sentence. Start with the subject: «Der Hund hat ${c.a.text} gesehen».`;
+      break;
+    case 'wo-motion':
+      title = 'Wohin oder woher?';
+      text = '«wo» asks where something happens. Going somewhere: «Wohin gehst du?». Coming from somewhere: «Woher kommst du?».';
+      break;
+    case 'was-wer':
+      title = 'Wer oder was?';
+      text = `«was» asks about things. For people and animals ask «wer»: «Wer ${s.fin.text} …?»`;
+      break;
+    case 'two-freq':
+      title = 'Oft oder immer?';
+      text = `${Q(c.other.word)} and ${Q(c.a.word)} contradict each other (“${c.other.en} ${c.a.en}”). Use one: «Ich esse oft Pizza» or «Ich esse immer Pizza».`;
+      break;
     case 'two-time':
       title = 'Zwei Zeitangaben';
       text = 'Use one time word per sentence: heute, gestern, morgen …';
@@ -516,6 +588,7 @@ export function explain(error) {
     case 'sem-obj':
       title = 'Sinn?';
       text = `Grammar ✓, but you can’t ${gloss(v)} ${s.obj.en}!`;
+      if (c.main === 'kochen') text += ' You cook Suppe, Nudeln, ein Ei, Kaffee or Tee; a salad you make («Salat machen»).';
       break;
     case 'sem-passive':
       title = 'Sinn?';
@@ -578,7 +651,7 @@ export function suggest(words) {
       if (r.viable) {
         if (order.length === n) {
           if (r.ok && order.some((k, j) => k !== j)) {
-            const d = distance(order) + (r.parse.question ? 0.5 : 0);
+            const d = distance(order) + (r.parse.question ? 1.5 : 0);
             if (d < bestD) {
               bestD = d;
               best = r.parse;

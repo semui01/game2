@@ -31,23 +31,23 @@ export const VERBS = {
   finden: { en: ['find', 'finds', 'found', 'found'], praes: 'finde findest findet finden findet finden', praet: 'fand fandest fand fanden fandet fanden', part: 'gefunden', aux: 'haben', obj: 'req', objTags: ['any'] },
   kaufen: { en: ['buy', 'buys', 'bought', 'bought'], ...weak('kauf'), part: 'gekauft', aux: 'haben', obj: 'req', objTags: ['food', 'drink', 'text', 'thing'], subj: ['human'] },
   spielen: { en: ['play', 'plays', 'played', 'played'], ...weak('spiel'), part: 'gespielt', aux: 'haben', obj: 'opt', objTags: ['game'] },
-  haben: { en: ['have', 'has', 'had', 'had'], praes: 'habe hast hat haben habt haben', praet: 'hatte hattest hatte hatten hattet hatten', part: 'gehabt', aux: 'haben', obj: 'req', objTags: ['human', 'animal', 'food', 'drink', 'text', 'thing', 'task'] },
+  haben: { en: ['have', 'has', 'had', 'had'], praes: 'habe hast hat haben habt haben', praet: 'hatte hattest hatte hatten hattet hatten', part: 'gehabt', aux: 'haben', obj: 'req', objTags: ['animal', 'food', 'drink', 'text', 'thing', 'task'] },
   machen: { en: ['do', 'does', 'did', 'done'], enAlt: { tags: ['food'], en: ['make', 'makes', 'made', 'made'] }, ...weak('mach'), part: 'gemacht', aux: 'haben', obj: 'req', objTags: ['task', 'food'], subj: ['human'] },
   lieben: { en: ['love', 'loves', 'loved', 'loved'], ...weak('lieb'), part: 'geliebt', aux: 'haben', obj: 'req', objTags: ['any'] },
   mögen: { en: ['like', 'likes', 'liked', 'liked'], praes: 'mag magst mag mögen mögt mögen', praet: 'mochte mochtest mochte mochten mochtet mochten', part: 'gemocht', aux: 'haben', obj: 'req', objTags: ['any'], noGern: true },
   möchten: { en: ['like', 'likes', 'liked', 'liked'], wouldLike: true, praes: 'möchte möchtest möchte möchten möchtet möchten', aux: 'haben', obj: 'req', objTags: ['any'], noGern: true, noInf: true },
   besuchen: { en: ['visit', 'visits', 'visited', 'visited'], ...weak('besuch'), part: 'besucht', aux: 'haben', obj: 'req', objTags: ['human', 'place'], subj: ['human'] },
-  kochen: { en: ['cook', 'cooks', 'cooked', 'cooked'], enAlt: { tags: ['drink'], en: ['make', 'makes', 'made', 'made'] }, ...weak('koch'), part: 'gekocht', aux: 'haben', obj: 'opt', objTags: ['food', 'drink'], subj: ['human'] },
+  kochen: { en: ['cook', 'cooks', 'cooked', 'cooked'], enAlt: { tags: ['drink'], en: ['make', 'makes', 'made', 'made'] }, ...weak('koch'), part: 'gekocht', aux: 'haben', obj: 'opt', objTags: ['cooked'], subj: ['human'] },
   brauchen: { en: ['need', 'needs', 'needed', 'needed'], ...weak('brauch'), part: 'gebraucht', aux: 'haben', obj: 'req', objTags: ['any'] },
   suchen: { en: ['look', 'looks', 'looked', 'looked'], enSfx: 'for', ...weak('such'), part: 'gesucht', aux: 'haben', obj: 'req', objTags: ['any'] },
   hören: { en: ['hear', 'hears', 'heard', 'heard'], ...weak('hör'), part: 'gehört', aux: 'haben', obj: 'opt', objTags: ['human', 'animal', 'music', 'text'] },
 
-  gehen: { en: ['go', 'goes', 'went', 'gone'], praes: 'gehe gehst geht gehen geht gehen', praet: 'ging gingst ging gingen gingt gingen', part: 'gegangen', aux: 'sein', obj: 'none' },
-  kommen: { en: ['come', 'comes', 'came', 'come'], praes: 'komme kommst kommt kommen kommt kommen', praet: 'kam kamst kam kamen kamt kamen', part: 'gekommen', aux: 'sein', obj: 'none' },
-  fahren: { en: ['drive', 'drives', 'drove', 'driven'], praes: 'fahre fährst fährt fahren fahrt fahren', praet: 'fuhr fuhrst fuhr fuhren fuhrt fuhren', part: 'gefahren', aux: 'sein', obj: 'none', subj: ['human'] },
+  gehen: { en: ['go', 'goes', 'went', 'gone'], praes: 'gehe gehst geht gehen geht gehen', praet: 'ging gingst ging gingen gingt gingen', part: 'gegangen', aux: 'sein', obj: 'none', noWo: true },
+  kommen: { en: ['come', 'comes', 'came', 'come'], praes: 'komme kommst kommt kommen kommt kommen', praet: 'kam kamst kam kamen kamt kamen', part: 'gekommen', aux: 'sein', obj: 'none', noWo: true },
+  fahren: { en: ['drive', 'drives', 'drove', 'driven'], praes: 'fahre fährst fährt fahren fahrt fahren', praet: 'fuhr fuhrst fuhr fuhren fuhrt fuhren', part: 'gefahren', aux: 'sein', obj: 'none', subj: ['human'], noWo: true },
   laufen: { en: ['run', 'runs', 'ran', 'run'], praes: 'laufe läufst läuft laufen lauft laufen', praet: 'lief liefst lief liefen lieft liefen', part: 'gelaufen', aux: 'sein', obj: 'none' },
   schwimmen: { en: ['swim', 'swims', 'swam', 'swum'], praes: 'schwimme schwimmst schwimmt schwimmen schwimmt schwimmen', praet: 'schwamm schwammst schwamm schwammen schwammt schwammen', part: 'geschwommen', aux: 'sein', obj: 'none' },
-  fliegen: { en: ['fly', 'flies', 'flew', 'flown'], praes: 'fliege fliegst fliegt fliegen fliegt fliegen', praet: 'flog flogst flog flogen flogt flogen', part: 'geflogen', aux: 'sein', obj: 'none', subj: ['human', 'bird'] },
+  fliegen: { en: ['fly', 'flies', 'flew', 'flown'], praes: 'fliege fliegst fliegt fliegen fliegt fliegen', praet: 'flog flogst flog flogen flogt flogen', part: 'geflogen', aux: 'sein', obj: 'none', subj: ['human', 'bird'], noWo: true },
   bleiben: { en: ['stay', 'stays', 'stayed', 'stayed'], praes: 'bleibe bleibst bleibt bleiben bleibt bleiben', praet: 'blieb bliebst blieb blieben bliebt blieben', part: 'geblieben', aux: 'sein', obj: 'none' },
   schlafen: { en: ['sleep', 'sleeps', 'slept', 'slept'], praes: 'schlafe schläfst schläft schlafen schlaft schlafen', praet: 'schlief schliefst schlief schliefen schlieft schliefen', part: 'geschlafen', aux: 'haben', obj: 'none' },
   arbeiten: { en: ['work', 'works', 'worked', 'worked'], ...weak('arbeit'), part: 'gearbeitet', aux: 'haben', obj: 'none', subj: ['human'] },
@@ -60,7 +60,7 @@ export const VERBS = {
   einkaufen: { sep: 'ein', en: ['go', 'goes', 'went', 'gone'], enSfx: 'shopping', ...weak('kauf'), part: 'eingekauft', aux: 'haben', obj: 'none', subj: ['human'] },
   anrufen: { sep: 'an', en: ['call', 'calls', 'called', 'called'], praes: 'rufe rufst ruft rufen ruft rufen', praet: 'rief riefst rief riefen rieft riefen', part: 'angerufen', aux: 'haben', obj: 'req', objTags: ['human'], subj: ['human'] },
   fernsehen: { sep: 'fern', en: ['watch', 'watches', 'watched', 'watched'], enSfx: 'TV', praes: 'sehe siehst sieht sehen seht sehen', praet: 'sah sahst sah sahen saht sahen', part: 'ferngesehen', aux: 'haben', obj: 'none', subj: ['human'] },
-  mitkommen: { sep: 'mit', en: ['come', 'comes', 'came', 'come'], enSfx: 'along', praes: 'komme kommst kommt kommen kommt kommen', praet: 'kam kamst kam kamen kamt kamen', part: 'mitgekommen', aux: 'sein', obj: 'none' },
+  mitkommen: { sep: 'mit', en: ['come', 'comes', 'came', 'come'], enSfx: 'along', praes: 'komme kommst kommt kommen kommt kommen', praet: 'kam kamst kam kamen kamt kamen', part: 'mitgekommen', aux: 'sein', obj: 'none', noWo: true },
   einladen: { sep: 'ein', en: ['invite', 'invites', 'invited', 'invited'], praes: 'lade lädst lädt laden ladet laden', praet: 'lud ludst lud luden ludet luden', part: 'eingeladen', aux: 'haben', obj: 'req', objTags: ['human'], subj: ['human'] },
   anfangen: { sep: 'an', en: ['start', 'starts', 'started', 'started'], praes: 'fange fängst fängt fangen fangt fangen', praet: 'fing fingst fing fingen fingt fingen', part: 'angefangen', aux: 'haben', obj: 'none', subj: ['human'] },
 
@@ -108,17 +108,17 @@ export const NOUNS = {
   Eltern: { g: 'pl', en: 'parents', tags: ['human'] },
 
   Apfel: { g: 'm', en: 'apple', an: true, tags: ['food'] },
-  Kuchen: { g: 'm', en: 'cake', tags: ['food'], dets: MASS_COUNT },
+  Kuchen: { g: 'm', en: 'cake', tags: ['food'], dets: MASS_COUNT, mass: true },
   Pizza: { g: 'f', en: 'pizza', tags: ['food'], dets: MASS_COUNT, mass: true },
-  Suppe: { g: 'f', en: 'soup', tags: ['food'], dets: MASS_COUNT, mass: true },
+  Suppe: { g: 'f', en: 'soup', tags: ['food', 'cooked'], dets: MASS_COUNT, mass: true },
   Brot: { g: 'n', en: 'bread', tags: ['food'], dets: MASS_COUNT, mass: true },
-  Ei: { g: 'n', en: 'egg', an: true, tags: ['food'] },
+  Ei: { g: 'n', en: 'egg', an: true, tags: ['food', 'cooked'] },
   Banane: { g: 'f', en: 'banana', tags: ['food'] },
-  Nudeln: { g: 'pl', en: 'pasta', tags: ['food'], dets: MASS, mass: true },
+  Nudeln: { g: 'pl', en: 'pasta', tags: ['food', 'cooked'], dets: MASS, mass: true },
   Schokolade: { g: 'f', en: 'chocolate', tags: ['food'], dets: MASS, mass: true },
   Salat: { g: 'm', en: 'salad', tags: ['food'], dets: MASS_COUNT, mass: true },
-  Kaffee: { g: 'm', en: 'coffee', tags: ['drink'], dets: MASS_COUNT, mass: true },
-  Tee: { g: 'm', en: 'tea', tags: ['drink'], dets: MASS, mass: true },
+  Kaffee: { g: 'm', en: 'coffee', tags: ['drink', 'cooked'], dets: MASS_COUNT, mass: true },
+  Tee: { g: 'm', en: 'tea', tags: ['drink', 'cooked'], dets: MASS, mass: true },
   Wasser: { g: 'n', en: 'water', tags: ['drink'], dets: MASS, mass: true },
   Milch: { g: 'f', en: 'milk', tags: ['drink'], dets: MASS, mass: true },
   Saft: { g: 'm', en: 'juice', tags: ['drink'], dets: MASS_COUNT, mass: true },
@@ -315,7 +315,8 @@ for (const [word, d] of Object.entries(ADVERBS)) add(word, { r: 'adv', word, ...
 for (const [word, d] of Object.entries(ADJECTIVES)) add(word, { r: 'adj', word, ...d });
 add('nicht', { r: 'nicht', word: 'nicht' });
 
-add('was', { r: 'subj', wh: true, ps: [2], tags: ['any'], en: 'what', caseOk: true });
+// «was» as subject asks about things; people and animals take «wer».
+add('was', { r: 'subj', wh: true, ps: [2], tags: ['thing', 'food', 'drink', 'text', 'place', 'film', 'music', 'game', 'task', 'cooked'], en: 'what', caseOk: true });
 add('was', { r: 'obj', wh: true, tags: ['any'], en: 'what', caseOk: true });
 add('wer', { r: 'subj', wh: true, ps: [2], tags: ['human'], en: 'who', caseOk: true });
 add('wer', { r: 'obj', wh: true, tags: ['human'], en: 'who', caseOk: false, accText: 'wen' });
